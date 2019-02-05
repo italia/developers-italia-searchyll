@@ -173,7 +173,7 @@ module Searchyll
       bulk_insert.content_type = 'application/x-ndjson'
       bulk_insert.body = batch.map do |doc|
         [{ index: {} }.to_json, doc.to_json].join("\n")
-      end.force_encoding('ascii-8bit').join("\n") + "\n"
+      end.join("\n").force_encoding('ascii-8bit') + "\n"
       res = http.request(bulk_insert)
       if !res.kind_of?(Net::HTTPSuccess)
         $stderr.puts "Elasticsearch returned an error when performing bulk insert: " + res.message + " " + res.body
