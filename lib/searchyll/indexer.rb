@@ -221,19 +221,38 @@ module Searchyll
     # hot swap the index into the canonical alias
     def finalize_aliases(http)
       update_aliases = http_post('/_aliases')
+
+      # perform removal and addition in two different calls so that
+      # the second one is performed even if the first one fails
+      if !old_indices.empty?
+        update_aliases.body = {
+          actions: [
+            { remove: {
+              index: old_indices.join(','),
+              alias: configuration.elasticsearch_index_base_name
+            } }
+          ]
+        }.to_json
+        res = http.request(update_aliases)
+        if !res.kind_of?(Net::HTTPSuccess)
+          $stderr.puts "Elasticsearch returned an error when removing old aliases: " + res.message + " " + res.body
+          exit
+        end
+      end
+
       update_aliases.body = {
         actions: [
-          { remove: {
-            index: old_indices.join(','),
-            alias: configuration.elasticsearch_index_base_name
-          } },
           { add: {
             index: elasticsearch_index_name,
             alias: configuration.elasticsearch_index_base_name
           } }
         ]
       }.to_json
-      http.request(update_aliases)
+      res = http.request(update_aliases)
+      if !res.kind_of?(Net::HTTPSuccess)
+        $stderr.puts "Elasticsearch returned an error when assigning the new alias: " + res.message + " " + res.body
+        exit
+      end
     end
 
     # delete old indices after a successful reindexing run
