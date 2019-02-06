@@ -1,3 +1,5 @@
+> This repository is a fork of https://github.com/omc/searchyll used for indexing the [developers.italia.it](https://github.com/italia/developers.italia.it) website. All the changes were contributed upstream, so when all our [pull requests](https://github.com/omc/searchyll/pulls?utf8=✓&q=is%3Apr+author%3Aalranel+) are merged we can get rid of this fork.
+
 # Searchyll
 
 Search for Jekyll apps. A plugin for indexing your pages into a search engine.
