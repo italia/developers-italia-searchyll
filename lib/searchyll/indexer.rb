@@ -106,7 +106,7 @@ module Searchyll
     # A versioned index name, based on the time of the indexing run.
     # Will be later added to an alias for hot reindexing.
     def elasticsearch_index_name
-      "#{configuration.elasticsearch_index_base_name}-#{timestamp.strftime('%Y%m%d%H%M%S')}"
+      @elasticsearch_index_name ||= "#{configuration.elasticsearch_index_base_name}-#{timestamp.strftime('%Y%m%d%H%M%S')}"
     end
 
     # Prepare an HTTP connection
@@ -177,7 +177,7 @@ module Searchyll
       res = http.request(bulk_insert)
       if !res.kind_of?(Net::HTTPSuccess)
         $stderr.puts "Elasticsearch returned an error when performing bulk insert: " + res.message + " " + res.body
-        exit
+        exit(1)
       end
     end
 
@@ -195,12 +195,12 @@ module Searchyll
 
     # List the indices currently in the cluster, caching the call in an ivar
     def old_indices
-      # return if defined?(@old_indices)
+      return @old_indices if defined?(@old_indices)
       resp = http_start { |h| h.request(http_get('/_cat/indices?h=index')) }
       indices = JSON.parse(resp.body).map { |i| i['index'] }
       indices = indices.select { |i| i =~ /\A#{configuration.elasticsearch_index_base_name}/ }
       indices -= [elasticsearch_index_name]
-      # @old_indices = indices
+      @old_indices = indices
       indices
     end
 
@@ -265,16 +265,19 @@ module Searchyll
       res = http.request(update_aliases)
       if !res.kind_of?(Net::HTTPSuccess)
         $stderr.puts "Elasticsearch returned an error when assigning the new alias: " + res.message + " " + res.body
-        exit
+        exit(1)
       end
     end
 
     # delete old indices after a successful reindexing run
     def finalize_cleanup(http)
       return if old_indices.nil? || old_indices.empty?
-      cleanup_indices = http_delete("/#{old_indices.join(',')}")
       puts %(       Old indices: #{old_indices.join(', ')})
-      http.request(cleanup_indices)
+      cleanup_indices = http_delete("/#{old_indices.join(',')}")
+      res = http.request(cleanup_indices)
+      if !res.kind_of?(Net::HTTPSuccess)
+        $stderr.puts "Elasticsearch returned an error when deleting old indices: " + res.message + " " + res.body
+      end
     end
   end
 end
