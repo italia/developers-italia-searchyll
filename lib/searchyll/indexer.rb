@@ -19,6 +19,8 @@ module Searchyll
     attr_accessor :queue
     attr_accessor :timestamp
     attr_accessor :uri
+    attr_accessor :es_user
+    attr_accessor :es_pass
     attr_accessor :working
     attr_accessor :ignore_regex
 
@@ -27,6 +29,8 @@ module Searchyll
     def initialize(configuration)
       self.configuration = configuration
       self.uri           = URI(configuration.elasticsearch_url)
+      self.es_user       = configuration.elasticsearch_user
+      self.es_pass       = configuration.elasticsearch_pass
       self.queue         = Queue.new
       self.working       = true
       self.timestamp     = Time.now
@@ -159,8 +163,12 @@ module Searchyll
       req = klass.new(path)
       req.content_type = 'application/json'
       req['Accept']    = 'application/json'
-      # Append auth credentials if the exist
-      req.basic_auth(uri.user, uri.password) if uri.user && uri.password
+      # Append auth credentials if they exist
+      # it trying to get them from env and then from
+      # elasticsearch uri itself
+      user = es_user || uri.user
+      pass = es_pass || uri.password
+      req.basic_auth(user, pass) if user && pass
       req
     end
 
