@@ -11,6 +11,12 @@ module Searchyll
       ENV['BONSAI_URL'] || ENV['ELASTICSEARCH_URL'] ||
         ((site.config||{})['elasticsearch']||{})['url']
     end
+    def elasticsearch_user
+      ENV['ELASTICSEARCH_USER']
+    end
+    def elasticsearch_pass
+      ENV['ELASTICSEARCH_PASS']
+    end
 
     def valid?
       elasticsearch_url && !elasticsearch_url.empty? && elasticsearch_url.start_with?('http')

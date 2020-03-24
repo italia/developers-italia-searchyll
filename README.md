@@ -39,6 +39,18 @@ elasticsearch:
     - /news/*
 ```
 
+### ES Auth
+Elasticsearch authentication can be provided both by passing user and password as URI parameter:
+```yaml
+url: https://user:pass@someurl.com
+```
+Or by easily setting those ENV variables:
+```sh
+ELASTICSEARCH_URL=http://localhost:9200/
+ELASTICSEARCH_USER=elastic
+ELASTICSEARCH_UPASS=changeme
+```
+
 ### Custom Settings File Example
 
 It should be written to be plugged into the `settings` slot of a [create index](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-create-index.html) call
