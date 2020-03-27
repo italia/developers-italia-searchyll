@@ -48,7 +48,7 @@ Or by easily setting those ENV variables:
 ```sh
 ELASTICSEARCH_URL=http://localhost:9200/
 ELASTICSEARCH_USER=elastic
-ELASTICSEARCH_UPASS=changeme
+ELASTICSEARCH_PASS=changeme
 ```
 
 ### Custom Settings File Example
