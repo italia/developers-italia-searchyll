@@ -130,8 +130,8 @@ module Searchyll
       }
 
       if configuration.elasticsearch_mapping
-        payload['mappings'] = {}
-        payload['mappings'].store(configuration.elasticsearch_default_type, configuration.elasticsearch_mapping)
+        # OpenSearch/ES 7+ doesn't support type in mappings - use flat structure
+        payload['mappings'] = configuration.elasticsearch_mapping
       end
 
       json_payload = payload.to_json
@@ -177,7 +177,8 @@ module Searchyll
     # https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
     def es_bulk_insert!(http, batch)
       return if batch.empty?
-      bulk_insert = http_post("/#{elasticsearch_index_name}/#{configuration.elasticsearch_default_type}/_bulk")
+      # OpenSearch/ES 7+ doesn't support type in bulk endpoint
+      bulk_insert = http_post("/#{elasticsearch_index_name}/_bulk")
       bulk_insert.content_type = 'application/x-ndjson'
       bulk_insert.body = batch.map do |doc|
         [{ index: {} }.to_json, doc.to_json].join("\n")
