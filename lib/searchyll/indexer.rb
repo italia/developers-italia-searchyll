@@ -205,7 +205,7 @@ module Searchyll
     # List the indices currently in the cluster, caching the call in an ivar
     def old_indices
       return @old_indices if defined?(@old_indices)
-      resp = http_start { |h| h.request(http_get('/_cat/indices?h=index')) }
+      resp = http_start { |h| h.request(http_get('/_cat/indices?h=index&format=json')) }
       indices = JSON.parse(resp.body).map { |i| i['index'] }
       indices = indices.select { |i| i =~ /\A#{configuration.elasticsearch_index_base_name}/ }
       indices -= [elasticsearch_index_name]
