@@ -231,12 +231,13 @@ module Searchyll
       http.request(refresh)
     end
 
-    # add replication to the new index
+    # add replication to the new index and restore refresh_interval
     def finalize_replication(http)
       add_replication = http_put("/#{elasticsearch_index_name}/_settings")
       add_replication.body = {
         index: {
-          number_of_replicas: configuration.elasticsearch_number_of_replicas
+          number_of_replicas: configuration.elasticsearch_number_of_replicas,
+          refresh_interval: "1s"
         }
       }.to_json
       http.request(add_replication)
